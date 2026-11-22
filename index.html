@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Generatore frazioni sulla linea</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#ededed;color:#111}.app{display:grid;grid-template-columns:355px 1fr;gap:18px;padding:18px;align-items:start}.panel{background:white;border:1px solid #ccc;border-radius:9px;padding:15px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}h1{font-size:19px;margin:0 0 10px}label{display:block;font-size:13px;margin:10px 0 4px}input,select,textarea,button{width:100%;padding:8px;font:inherit;border:1px solid #aaa;border-radius:5px}textarea{min-height:190px;font:12px/1.5 Consolas,monospace;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.hint{font-size:12px;line-height:1.45;color:#555;margin:7px 0}button{background:#111;color:white;cursor:pointer;margin-top:9px;border:0}button.secondary{background:white;color:#111;border:1px solid #111}.error{color:#a00000;white-space:pre-wrap;font-size:12px;margin-top:7px}.preview{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.page{width:210mm;height:297mm;background:white;box-shadow:0 2px 12px #0003;padding:12mm;display:flex;flex-direction:column;flex-shrink:0}.heading{text-align:center;font-weight:bold;font-size:21px;margin-bottom:3mm}.subtitle{text-align:center;font-size:12px;margin-bottom:7mm}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:5mm;flex:1;min-height:0}.grid.eight{grid-template-rows:repeat(4,minmax(0,1fr))}.task{border:1px solid #111;padding:5mm 4mm;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}.question{font-size:12px;min-height:11mm;line-height:1.3}.number{font-weight:bold;margin-right:3px}.line{width:100%;height:auto;flex:1;min-height:0;max-height:39mm}.options{display:flex;justify-content:space-evenly;align-items:center;font-size:15px;gap:5px;margin-top:auto}.options span{white-space:nowrap}.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.08;min-width:1.2em;font-family:Georgia,serif}.frac>span:first-child{border-bottom:1px solid #111;padding:0 2px 2px}.frac>span:last-child{padding-top:2px}.answer-list{display:grid;grid-template-columns:1fr 1fr;gap:8mm;font-size:17px;margin-top:12mm}.answer-item{padding:5mm;border-bottom:1px solid #bbb}.answer-note{font-size:12px;margin-top:3mm;color:#444}.solution{font-size:12px;text-align:center;margin-top:2mm;font-weight:bold}.footer{text-align:center;font-size:9px;margin-top:4mm;color:#555}.line text{font-family:Arial,sans-serif;fill:#111;font-size:13px}.line .point{font-size:14px;font-weight:bold}@media(max-width:1000px){.app{display:block}.panel{position:static;max-height:none;margin-bottom:15px}.preview{overflow:auto;justify-content:flex-start}}@page{size:A4 portrait;margin:0}@media print{body{background:white}.panel{display:none}.app{display:block;padding:0}.preview{display:block}.page{box-shadow:none;margin:0;width:210mm;height:297mm;page-break-after:always}.answer-page{display:flex!important}.answer-page:not(.print-enabled){display:none!important}.solution:not(.print-visible){display:none!important}}
+</style></head><body><div class="app"><aside class="panel"><h1>Frazioni sulla linea dei numeri</h1>
+<label>Tipo di attività</label><select id="activity"><option value="nearest">Quale frazione è più vicina?</option><option value="exact">Quale frazione rappresenta A?</option><option value="mixed">Mista — entrambe le attività</option></select><label>Livello</label><select id="level"><option value="1">1 — Estremi visibili</option><option value="2">2 — Frazione di riferimento, estremo destro nascosto</option></select>
+<div class="row"><div><label>Esercizi per pagina</label><select id="count"><option>6</option><option>8</option></select></div><div><label>Modalità intervallo</label><select id="preset"><option value="custom">Personalizzato</option><option value="0|1">0 → 1</option><option value="1|2">1 → 2</option><option value="2|3">2 → 3</option><option value="0|2/3">0 → 2/3</option><option value="1/4|5/4">1/4 → 5/4</option></select></div></div>
+<div class="row"><div><label>Estremo sinistro</label><input id="left" value="0" placeholder="0 oppure 1/4"></div><div><label>Estremo destro</label><input id="right" value="1" placeholder="2/3 oppure 1 1/2"></div></div>
+<div class="hint">Sono ammessi interi, frazioni e numeri misti. Nel livello 2 l'estremo destro serve per la scala ma non viene scritto sulla scheda.</div>
+<div class="row"><div><label>Difficoltà del confronto</label><select id="difficulty"><option value="easy">Facile</option><option value="balanced" selected>Equilibrata</option><option value="hard">Impegnativa</option></select></div><div><label>Soluzioni</label><select id="answerMode"><option value="hidden">Nascoste</option><option value="shown">Mostra risposte</option></select></div></div><label><input id="printAnswers" type="checkbox" style="width:auto"> Aggiungi pagina delle soluzioni al PDF</label><div class="hint">Le opzioni sono frazioni non intere. In «vicino» il punto A non coincide con le risposte; in «esatto» coincide con una delle due. Le distanze sono calcolate numericamente, non a occhio. Puoi sempre modificare i valori manualmente.</div><label>Titolo</label><input id="title" value="Frazioni sulla linea dei numeri">
+<label>Dati degli esercizi (modificabili)</label><textarea id="data" spellcheck="false"></textarea>
+<div class="hint">Ogni riga contiene valori separati da <b>|</b>.<br><b>Livello 1:</b> sinistra | destra | punto A | opzione 1 | opzione 2<br><code>0 | 2/3 | 7/15 | 1/2 | 1/3</code><br><b>Livello 2:</b> sinistra | destra nascosta | riferimento | punto A | opzione 1 | opzione 2<br><code>0 | 1 | 1/2 | 11/15 | 2/3 | 3/4</code><br>La posizione di A si indica con una frazione, non con coordinate decimali. Nella modalità mista le domande si alternano. Per le righe manuali, aggiungi facoltativamente | vicino oppure | esatto alla fine.</div>
+<button id="generate">Genera nuovi esercizi</button><button id="update" class="secondary">Aggiorna anteprima</button><button id="print" class="secondary">Stampa / salva PDF</button><div id="error" class="error" role="alert"></div></aside>
+<main class="preview"><section class="page"><div class="heading" id="heading"></div><div class="subtitle" id="subtitle"></div><div id="grid" class="grid"></div><div class="footer">Giocare con la matematica</div></section><section class="page answer-page" id="answerPage" style="display:none"><div class="heading">Soluzioni</div><div class="subtitle" id="answerSubtitle"></div><div id="answerList" class="answer-list"></div><div class="footer">Giocare con la matematica</div></section></main></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){let t=a%b;a=b;b=t}return a||1}
+function rat(n,d=1){if(!Number.isSafeInteger(n)||!Number.isSafeInteger(d)||d===0)throw Error('Numero non valido');if(d<0){n=-n;d=-d}const g=gcd(n,d);return {n:n/g,d:d/g}}
+function parse(s){s=String(s).trim();let m;if(m=s.match(/^(-?\d+)\s+(\d+)\s*\/\s*(\d+)$/)){let w=+m[1],a=+m[2],b=+m[3];return rat(w*b+(w<0?-a:a),b)}if(m=s.match(/^(-?\d+)\s*\/\s*(\d+)$/))return rat(+m[1],+m[2]);if(m=s.match(/^(-?\d+)$/))return rat(+m[1]);if(m=s.match(/^(-?\d+)[.,](\d+)$/)){let d=10**m[2].length;return rat(+m[1]*d+(m[1].startsWith('-')?-1:1)*+m[2],d)}throw Error('Valore non riconosciuto: '+s)}
+const val=r=>r.n/r.d,format=r=>r.d===1?String(r.n):r.n+'/'+r.d;
+function add(a,b){return rat(a.n*b.d+b.n*a.d,a.d*b.d)}function sub(a,b){return rat(a.n*b.d-b.n*a.d,a.d*b.d)}
+function rnd(a){return a[Math.floor(Math.random()*a.length)]}function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+const unitFractions=[];for(let d=2;d<=12;d++)for(let n=1;n<d;n++)unitFractions.push(rat(n,d));
+function uniqueFractions(a){const seen=new Set();return a.filter(r=>{let k=format(r);if(seen.has(k))return false;seen.add(k);return true})}
+const candidates=uniqueFractions(unitFractions);
+function fractionBetween(a,b){const range=val(b)-val(a);return candidates.map(f=>add(a,rat(f.n*(b.n*a.d-a.n*b.d),f.d*b.d*a.d))).filter(f=>val(f)>val(a)+.001&&val(f)<val(b)-.001)}
+// Candidate positions are calculated as fractions of the chosen interval; the resulting labels are exact rational numbers.
+function buildExercise(left,right,level){
+ const L=val(left),R=val(right),span=R-L;
+ if(!(span>0))throw Error('L’estremo destro deve essere maggiore del sinistro.');
+ const difficulty=$('difficulty').value;
+ // Genera frazioni autentiche sull'intera linea: non semplici multipli dell'intervallo.
+ // Nessuna opzione è un numero intero; denominatori ridotti tra 2 e 10.
+ const pool=[];
+ for(let d=2;d<=10;d++){
+  const first=Math.floor(L*d)+1,last=Math.ceil(R*d)-1;
+  for(let n=first;n<=last;n++){
+   if(n%d===0)continue;
+   const f=rat(n,d);
+   if(f.d!==d)continue;
+   const v=val(f);
+   if(v>L+span*.035&&v<R-span*.035)pool.push(f);
+  }
+ }
+ const options=uniqueFractions(pool);
+ const bands={easy:[.28,.65],balanced:[.16,.40],hard:[.09,.24]};
+ const [lo,hi]=bands[difficulty];
+ const maxGap=Math.min(hi,span*.38),minGap=Math.min(lo,maxGap*.7);
+ let pairs=[];
+ for(let i=0;i<options.length;i++)for(let j=i+1;j<options.length;j++){
+  const a=options[i],b=options[j],gap=val(b)-val(a);
+  if(gap<minGap-1e-9||gap>maxGap+1e-9)continue;
+  if(a.d===b.d&&difficulty!=='easy')continue;
+  // Evita coppie con denominatori troppo grandi quando ce ne sono di più semplici.
+  const weight=(a.d<=6&&b.d<=6?4:a.d<=8&&b.d<=8?2:1);
+  for(let k=0;k<weight;k++)pairs.push([a,b]);
+ }
+ if(!pairs.length){
+  // Intervalli molto piccoli: consenti anche lo stesso denominatore.
+  for(let i=0;i<options.length;i++)for(let j=i+1;j<options.length;j++){
+   const gap=val(options[j])-val(options[i]);
+   if(gap>=Math.min(.07,span*.10)&&gap<=Math.min(.65,span*.65))pairs.push([options[i],options[j]]);
+  }
+ }
+ if(!pairs.length)throw Error('Intervallo troppo stretto per generare due frazioni distinte: amplialo o modifica gli esercizi manualmente.');
+ const [o1,o2]=rnd(pairs);
+ // Per "vicino", A non coincide con nessuna risposta. La distanza è calcolata
+ // esattamente, e la scelta deve essere univoca. Per "esatto", A coincide
+ // con una delle frazioni candidate.
+ const activity=$('activity').value;
+ const kind=activity==='mixed'?(window.__exerciseIndex%2===0?'nearest':'exact'):activity;
+ const correct=rnd([o1,o2]);
+ let point=correct;
+ if(kind==='nearest'){
+  const other=correct===o1?o2:o1;
+  const gap=Math.abs(val(other)-val(correct));
+  const direction=val(other)>val(correct)?1:-1;
+  // Spostamento verso l'altra opzione, ma meno di metà della distanza.
+  // Così la frazione corretta è sempre la più vicina, senza coincidenza.
+  const shift=gap*(difficulty==='easy'?.17:difficulty==='hard'?.36:.27);
+  // Punto razionale con precisione 1/10000 dell'unità numerica.
+  point=rat(Math.round((val(correct)+direction*shift)*100000),100000);
+  if(val(point)<=L||val(point)>=R||val(point)===val(correct))point=rat(Math.round((val(correct)-direction*Math.min(gap*.20,(val(correct)-L)/2,(R-val(correct))/2))*100000),100000);
+ }
+ let ref=null;
+ if(level===2){
+  const refs=uniqueFractions([rat(1,2),rat(1,3),rat(2,3),rat(1,4),rat(3,4)].map(f=>add(left,rat((right.n*left.d-left.n*right.d)*f.n,right.d*left.d*f.d))));
+  ref=rnd(refs.filter(r=>Math.abs(val(r)-val(point))>span*.10))||refs[0];
+ }
+ const shuffled=shuffle([o1,o2]);
+ return [format(left),format(right),...(level===2?[format(ref)]:[]),format(point),format(shuffled[0]),format(shuffled[1]),kind].join(' | ');
+}
+function generate(){try{const l=parse($('left').value),r=parse($('right').value);if(val(r)<=val(l))throw Error('L’estremo destro deve essere maggiore del sinistro.');const level=+$('level').value;let rows=[],seen=new Set();for(let k=0;k<400&&rows.length<+$('count').value;k++){window.__exerciseIndex=rows.length;let row=buildExercise(l,r,level);if(!seen.has(row)){rows.push(row);seen.add(row)}}$('data').value=rows.join('\n');render()}catch(e){$('error').textContent=e.message}}
+function fractionMarkup(s){
+ const t=String(s).trim();
+ const m=t.match(/^(-?\d+)\s*\/\s*(\d+)$/);
+ if(!m)return escapeHTML(t);
+ return `<span class="frac"><span>${escapeHTML(m[1])}</span><span>${escapeHTML(m[2])}</span></span>`;
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fractionSvgLabel(x,y,t){
+ const m=String(t).match(/^(-?\d+)\s*\/\s*(\d+)$/);
+ if(!m)return `<text x="${x}" y="${y+7}" text-anchor="middle">${escapeHTML(t)}</text>`;
+ return `<text x="${x}" y="${y}" text-anchor="middle">${escapeHTML(m[1])}</text><line x1="${x-9}" y1="${y+4}" x2="${x+9}" y2="${y+4}" stroke="#111" stroke-width="1"/><text x="${x}" y="${y+19}" text-anchor="middle">${escapeHTML(m[2])}</text>`;
+}
+function svg(ex,level){const W=320,H=132,y=61,x0=28,x1=292;const l=val(ex.l),r=val(ex.r);const x=v=>x0+(val(v)-l)/(r-l)*(x1-x0);const label=(v,yy,text,cl='')=>`<text x="${v.toFixed(2)}" y="${yy}" text-anchor="middle" class="${cl}">${escapeHTML(text)}</text>`;let s=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#111" stroke-width="2"/><line x1="${x0}" y1="${y-7}" x2="${x0}" y2="${y+7}" stroke="#111" stroke-width="2"/>${label(x0,y+27,ex.left)}`;if(level===1)s+=`<line x1="${x1}" y1="${y-7}" x2="${x1}" y2="${y+7}" stroke="#111" stroke-width="2"/>${label(x1,y+27,ex.right)}`;if(level===2){let xr=x(ex.ref);s+=`<line x1="${xr}" y1="${y-7}" x2="${xr}" y2="${y+7}" stroke="#111" stroke-width="2"/>${fractionSvgLabel(xr,y+25,ex.refText)}`}const xp=x(ex.p);s+=`<circle cx="${xp}" cy="${y}" r="4.5" fill="#111"/>${label(xp,y-13,'A','point')}`;return `<svg class="line" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${s}</svg>`}
+function closest(ex){const d1=Math.abs(val(ex.p)-val(parse(ex.o1)));const d2=Math.abs(val(ex.p)-val(parse(ex.o2)));return d1<d2?parse(ex.o1):parse(ex.o2)}
+function render(){try{$('error').textContent='';const level=+$('level').value,count=+$('count').value;const lines=$('data').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,count);let parsed=lines.map((line,i)=>{const p=line.split('|').map(x=>x.trim());const base=level===1?5:6;if(p.length!==base&&p.length!==base+1)throw Error('Riga '+(i+1)+': numero di campi errato.');const kind=p.length===base+1?p.pop():($('activity').value==='mixed'?(i%2===0?'nearest':'exact'):$('activity').value);if(!['nearest','exact','vicino','esatto'].includes(kind))throw Error('Riga '+(i+1)+': attività non valida.');let [left,right,...rest]=p;let l=parse(left),r=parse(right);if(val(r)<=val(l))throw Error('Riga '+(i+1)+': intervallo non valido.');let refText=level===2?rest.shift():null;let point=rest.shift(),o1=rest.shift(),o2=rest.shift();let ref=refText?parse(refText):null,pv=parse(point),v1=parse(o1),v2=parse(o2);for(let [name,v] of [['punto A',pv],['prima opzione',v1],['seconda opzione',v2],...(ref?[['riferimento',ref]]:[])])if(val(v)<val(l)||val(v)>val(r))throw Error('Riga '+(i+1)+': '+name+' fuori intervallo.');if(Math.abs(Math.abs(val(pv)-val(v1))-Math.abs(val(pv)-val(v2)))<1e-10)throw Error('Riga '+(i+1)+': le opzioni sono equidistanti da A.');if((kind==='exact'||kind==='esatto')&&Math.abs(val(pv)-val(v1))>1e-9&&Math.abs(val(pv)-val(v2))>1e-9)throw Error('Riga '+(i+1)+': nella modalità esatta A deve coincidere con una delle opzioni.');return {left,right,l,r,ref,refText,p:pv,o1,o2,kind:kind==='vicino'?'nearest':kind==='esatto'?'exact':kind}});$('heading').textContent=$('title').value;$('subtitle').textContent='Osserva la linea e scegli la frazione corretta.';$('grid').className='grid '+(count===8?'eight':'');$('grid').innerHTML=parsed.map((ex,i)=>`<div class="task"><div class="question"><span class="number">${i+1}.</span> ${ex.kind==='exact'?'Quale frazione rappresenta il punto A?':'Quale frazione è più vicina al punto A?'}</div>${svg(ex,level)}<div class="options"><span>□ ${fractionMarkup(ex.o1)}</span><span>□ ${fractionMarkup(ex.o2)}</span></div><div class="solution" style="${$('answerMode').value==='shown'?'':'display:none'}">Risposta: ${fractionMarkup(format(closest(ex)))}</div></div>`).join('');$('answerSubtitle').textContent=$('title').value;$('answerList').innerHTML=parsed.map((ex,i)=>`<div class="answer-item"><b>${i+1}. ${fractionMarkup(format(closest(ex)))}</b><div class="answer-note">A = ${fractionMarkup(format(ex.p))}<br>Opzioni: ${fractionMarkup(ex.o1)} oppure ${fractionMarkup(ex.o2)}</div></div>`).join('');$('answerPage').style.display=$('printAnswers').checked?'flex':'none';$('answerPage').classList.toggle('print-enabled',$('printAnswers').checked);document.querySelectorAll('.solution').forEach(el=>el.classList.toggle('print-visible',$('answerMode').value==='shown'))}catch(e){$('error').textContent=e.message}}
+$('preset').addEventListener('change',()=>{if($('preset').value==='custom')return;let [l,r]=$('preset').value.split('|');$('left').value=l;$('right').value=r;generate()});['left','right'].forEach(id=>$(id).addEventListener('input',()=>{$('preset').value='custom'}));$('activity').addEventListener('change',generate);$('level').addEventListener('change',generate);$('count').addEventListener('change',generate);$('generate').addEventListener('click',generate);$('difficulty').addEventListener('change',generate);$('answerMode').addEventListener('change',render);$('printAnswers').addEventListener('change',render);$('update').addEventListener('click',render);$('print').addEventListener('click',()=>{render();if(!$('error').textContent)window.print()});$('title').addEventListener('input',render);generate();
+</script></body></html>
